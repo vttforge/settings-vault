@@ -90,6 +90,18 @@ pnpm run build
 
 `pnpm run build` writes `dist/` and a release zip with the manifest at the root.
 
+## Running it in a real Foundry
+
+`pnpm run e2e` installs the built module into a Foundry v14 container, joins
+as the Gamemaster, and drives the module's own API: it reads the live settings
+registry, changes a value, applies a profile over it, and checks the value came
+back. It also opens the window and asserts the console stayed clean.
+
+This one is local only. Booting Foundry needs a licence and an account, so it
+cannot run in CI on a fresh clone. It borrows the SDK repo's container harness,
+which is not published, so it expects the SDK checked out beside this repo, or
+`VTTFORGE_REPO` pointing at it.
+
 Built with the [VTTForge SDK](https://github.com/vttforge/vttforge).
 
 ## Licence

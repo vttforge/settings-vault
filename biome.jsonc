@@ -1,0 +1,13 @@
+{
+  // No $schema here: the preset carries one, and pinning a second version
+  // only produces a mismatch note when the bundled biome moves.
+  // Extends the preset @vttforge/cli ships, and relaxes one rule for the
+  // end-to-end script, whose printed report is the deliverable.
+  "extends": ["./node_modules/@vttforge/cli/lint/vttforge-biome.json"],
+  "overrides": [
+    {
+      "includes": ["e2e/**"],
+      "linter": { "rules": { "suspicious": { "noConsole": "off" } } }
+    }
+  ]
+}
