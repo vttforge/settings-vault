@@ -1,95 +1,51 @@
 /**
  * Run this module in a real Foundry v14 world and drive its own API.
  *
- * What no static check can reach: reading the live settings registry, and
- * writing values back through Foundry's own validation.
+ * What no static check can reach: reading the live settings registry, writing
+ * values back through Foundry's own validation, and the two refusals that only
+ * fire against a real user and a real rate limit.
  *
  * Local only. Booting Foundry needs a licence and an account, so this cannot
- * run in CI on a fresh clone. It also borrows the SDK repo's container
- * harness, which is not published yet, so it expects a sibling checkout:
+ * run in CI on a fresh clone. It needs:
  *
- *   ../vttforge            the SDK, with apps/e2e installed
- *   .env in that repo      FOUNDRY_LICENSE_KEY, FOUNDRY_USERNAME, FOUNDRY_PASSWORD
+ *   docker on the PATH
+ *   FOUNDRY_LICENSE_KEY, FOUNDRY_USERNAME, FOUNDRY_PASSWORD in the environment
+ *   FOUNDRY_ACCEPT_LICENSE=1, or pass acceptLicense below
  *
- * Then, from the SDK's apps/e2e directory:
+ * Then:
  *
- *   set -a && . ../../.env && set +a
- *   node ../../../settings-vault/e2e/live-check.mjs
+ *   pnpm run build
+ *   set -a && . .env && set +a
+ *   pnpm run e2e
  *
- * Exits non-zero when a check fails.
+ * The first run downloads Foundry and takes a couple of minutes. Later runs
+ * reuse the data volume.
+ *
+ * Exits non-zero when a check fails, and when it throws before the first one.
  */
-import { execFileSync } from 'node:child_process';
-import { existsSync } from 'node:fs';
-import { fileURLToPath, pathToFileURL } from 'node:url';
+import { fileURLToPath } from 'node:url';
 import { chromium } from '@playwright/test';
+import { foundryContainerLogs, startFoundryContainer } from '@vttforge/testing/container';
 
-/**
- * The container harness lives in the SDK repo and is not published, so it is
- * loaded from a sibling checkout by path. `VTTFORGE_REPO` overrides where.
- */
-const sdkRepo =
-  process.env.VTTFORGE_REPO ?? fileURLToPath(new URL('../../vttforge', import.meta.url));
-const harnessPath = `${sdkRepo}/apps/e2e/scripts/foundry.mjs`;
-if (!existsSync(harnessPath)) {
-  console.error(`The container harness is not at ${harnessPath}.`);
-  console.error('Check out the SDK beside this repo, or set VTTFORGE_REPO.');
-  process.exit(2);
-}
-const { logs, start } = await import(pathToFileURL(harnessPath).href);
-
-const CONTAINER = 'vttforge-e2e';
 const MODULE_ID = 'settings-vault';
 const MODULE_DIST = fileURLToPath(new URL('../dist', import.meta.url));
 
-function docker(args) {
-  return execFileSync('docker', args, { encoding: 'utf8' });
-}
+/**
+ * A world needs a system, and this module ships none. The fixture beside this
+ * file is the smallest one that will launch, and it registers a setting of each
+ * scope so a profile has something to carry.
+ */
+const SYSTEM_FIXTURE = fileURLToPath(new URL('./fixtures/system', import.meta.url));
 
-function install() {
-  docker([
-    'exec',
-    CONTAINER,
-    'sh',
-    '-lc',
-    `rm -rf /data/Data/modules/${MODULE_ID} && mkdir -p /data/Data/modules/${MODULE_ID}`,
-  ]);
-  docker(['cp', `${MODULE_DIST}/.`, `${CONTAINER}:/data/Data/modules/${MODULE_ID}`]);
-  const listed = docker(['exec', CONTAINER, 'sh', '-lc', `ls /data/Data/modules/${MODULE_ID}`]);
-  console.log('installed:', listed.trim().split('\n').join(' '));
-}
+/** Named for this repo, so a run never fights another project's container. */
+const CONTAINER = 'settings-vault-e2e';
 
 /**
- * Foundry scans the packages directory once, at startup, so a module copied
- * into a running container is invisible until it restarts. The lock is a
- * directory and stopping does not always clear it, same as the harness found.
+ * Its own port. The name and the volume being distinct is not enough: the
+ * published harness defaults every run to the same published port, so two
+ * projects with different container names still collide on it.
  */
-async function restart(url) {
-  try {
-    docker(['stop', CONTAINER]);
-  } catch {
-    // already stopped
-  }
-  docker([
-    'run',
-    '--rm',
-    '-v',
-    'vttforge-e2e-data:/data',
-    'alpine',
-    'sh',
-    '-lc',
-    'rm -rf /data/Config/options.json.lock',
-  ]);
-  docker(['start', CONTAINER]);
-  for (let i = 0; i < 90; i += 1) {
-    try {
-      await fetch(url, { redirect: 'manual' });
-      return;
-    } catch {
-      await new Promise((r) => setTimeout(r, 2000));
-    }
-  }
-  throw new Error('Foundry did not answer after the restart');
-}
+const PORT = Number(process.env.E2E_PORT ?? 30011);
 
 const results = [];
 function check(name, ok, detail = '') {
@@ -97,11 +53,21 @@ function check(name, ok, detail = '') {
   console.log(`${ok ? 'PASS' : 'FAIL'}  ${name}${detail ? `  — ${detail}` : ''}`);
 }
 
-const { baseUrl: url } = await start();
-console.log('foundry at', url);
-install();
-await restart(url);
-console.log('restarted so the package scan picks it up');
+// Foundry scans its packages directory once, at startup. Passing both here
+// installs them before the world launches, so nothing needs a restart.
+const foundry = await startFoundryContainer({
+  acceptLicense: true,
+  name: CONTAINER,
+  port: PORT,
+  worldId: 'settings-vault-e2e',
+  worldTitle: 'Settings Vault end-to-end',
+  packages: [
+    { kind: 'system', id: 'settings-vault-fixture', from: SYSTEM_FIXTURE },
+    { kind: 'module', id: MODULE_ID, from: MODULE_DIST },
+  ],
+});
+const url = foundry.baseUrl;
+console.log(`foundry at ${url} running ${foundry.system.id}@${foundry.system.version}`);
 
 const browser = await chromium.launch();
 const page = await browser.newPage();
@@ -488,12 +454,19 @@ try {
   console.log('\n--- threw ---');
   console.log(err?.message ?? String(err));
   console.log('\n--- container logs ---');
-  console.log(logs(30));
+  console.log(foundryContainerLogs(CONTAINER, 30));
   // Without this a throw before the first check leaves `results` empty, and
   // "0/0 checks passed" would exit 0. A run that died proved nothing.
   check('the run finished without throwing', false, err?.message ?? String(err));
 } finally {
   await browser.close();
+  // The container is this script's now, so this script takes it down. The data
+  // volume survives, so the next run does not download Foundry again.
+  if (process.env.KEEP_FOUNDRY === '1') {
+    console.log(`KEEP_FOUNDRY=1, leaving ${CONTAINER} running at ${foundry.baseUrl}`);
+  } else {
+    foundry.stop();
+  }
 }
 
 const failed = results.filter((r) => !r.ok);
