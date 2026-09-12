@@ -1,0 +1,42 @@
+{
+  "SETTINGS_VAULT.Menu.name": "Settings Vault",
+  "SETTINGS_VAULT.Menu.label": "Open the vault",
+  "SETTINGS_VAULT.Menu.hint": "Write module settings to a file, and read one back into this world.",
+
+  "SETTINGS_VAULT.Keybinding.open.name": "Open Settings Vault",
+  "SETTINGS_VAULT.Keybinding.open.hint": "Opens the vault window. No key is bound by default.",
+
+  "SETTINGS_VAULT.App.title": "Settings Vault",
+  "SETTINGS_VAULT.App.packages": "Packages",
+  "SETTINGS_VAULT.App.selectAll": "Select all",
+  "SETTINGS_VAULT.App.selectNone": "Select none",
+  "SETTINGS_VAULT.App.empty": "No package in this world has registered a setting.",
+  "SETTINGS_VAULT.App.countWorld": "{count} world",
+  "SETTINGS_VAULT.App.countClient": "{count} client",
+  "SETTINGS_VAULT.App.countUser": "{count} user",
+
+  "SETTINGS_VAULT.App.export": "Export",
+  "SETTINGS_VAULT.App.label": "Label",
+  "SETTINGS_VAULT.App.labelPlaceholder": "What this profile is for",
+  "SETTINGS_VAULT.App.includeSecrets": "Include values that look like credentials",
+  "SETTINGS_VAULT.App.includeSecretsHint": "{count} setting(s) have a key naming a token, password or licence. They stay out of the file unless you tick this. Read a profile before you share it.",
+  "SETTINGS_VAULT.App.exportButton": "Write a profile",
+
+  "SETTINGS_VAULT.App.import": "Import",
+  "SETTINGS_VAULT.App.file": "Profile file",
+  "SETTINGS_VAULT.App.importHint": "World settings apply to everyone. Client settings land on this device. User settings land on you, because Foundry writes them against the logged-in user and offers no way to write another user's.",
+  "SETTINGS_VAULT.App.importButton": "Read a profile",
+
+  "SETTINGS_VAULT.Confirm.title": "Apply this profile?",
+  "SETTINGS_VAULT.Confirm.body": "This writes {count} value(s) over what the world holds now. Export first if you want a way back.",
+
+  "SETTINGS_VAULT.Report.title": "Last import",
+  "SETTINGS_VAULT.Report.applied": "{count} value(s) applied.",
+  "SETTINGS_VAULT.Report.skipped": "{count} skipped:",
+
+  "SETTINGS_VAULT.Notify.nothingPicked": "Pick at least one package.",
+  "SETTINGS_VAULT.Notify.exported": "Wrote {count} value(s).",
+  "SETTINGS_VAULT.Notify.noFile": "Choose a profile file first.",
+  "SETTINGS_VAULT.Notify.unreadable": "That file is not valid JSON.",
+  "SETTINGS_VAULT.Notify.wrongFormat": "That file is not a Settings Vault profile."
+}

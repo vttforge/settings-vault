@@ -1,0 +1,38 @@
+{
+  "id": "settings-vault",
+  "type": "module",
+  "title": "Settings Vault",
+  "description": "Export module settings to a file, and read one back into another world.",
+  "version": "0.1.0",
+  "compatibility": {
+    "minimum": "14",
+    "verified": "14"
+  },
+  "authors": [
+    {
+      "name": "fcsouza"
+    }
+  ],
+  "esmodules": ["main.mjs"],
+  "styles": [
+    {
+      "src": "styles/main.css",
+      "layer": "modules"
+    }
+  ],
+  "languages": [
+    {
+      "lang": "en",
+      "name": "English",
+      "path": "lang/en.json"
+    }
+  ],
+  "flags": {
+    "hotReload": {
+      "extensions": ["css", "hbs", "json"],
+      "paths": ["styles", "templates", "lang"]
+    }
+  },
+  "url": "https://github.com/vttforge/settings-vault",
+  "manifest": "https://github.com/vttforge/settings-vault/releases/latest/download/module.json"
+}

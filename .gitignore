@@ -1,0 +1,15 @@
+node_modules
+dist
+.turbo
+.vscode
+.DS_Store
+*.log
+
+# vttforge dev — saved Foundry data-dir path
+.vttforge/
+
+# vttforge build — release artifact
+*.zip
+
+# Local agent notes — never tracked
+.claude/

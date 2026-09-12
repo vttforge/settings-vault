@@ -1,0 +1,85 @@
+<section class="settings-vault__body">
+
+  <fieldset class="settings-vault__packages">
+    <legend>{{localize "SETTINGS_VAULT.App.packages"}}</legend>
+
+    {{#if hasRows}}
+      <div class="settings-vault__bulk">
+        <button type="button" data-action="selectAll">{{localize "SETTINGS_VAULT.App.selectAll"}}</button>
+        <button type="button" data-action="selectNone">{{localize "SETTINGS_VAULT.App.selectNone"}}</button>
+      </div>
+
+      <ul class="settings-vault__list">
+        {{#each rows}}
+          <li>
+            <label>
+              <input type="checkbox" name="namespace" value="{{this.id}}" checked>
+              <span class="settings-vault__title">{{this.title}}</span>
+              <span class="settings-vault__counts">
+                {{localize "SETTINGS_VAULT.App.countWorld" count=this.world}},
+                {{localize "SETTINGS_VAULT.App.countClient" count=this.client}},
+                {{localize "SETTINGS_VAULT.App.countUser" count=this.user}}
+              </span>
+            </label>
+          </li>
+        {{/each}}
+      </ul>
+    {{else}}
+      <p class="notes">{{localize "SETTINGS_VAULT.App.empty"}}</p>
+    {{/if}}
+  </fieldset>
+
+  <fieldset>
+    <legend>{{localize "SETTINGS_VAULT.App.export"}}</legend>
+
+    <div class="form-group">
+      <label for="settings-vault-label">{{localize "SETTINGS_VAULT.App.label"}}</label>
+      <input type="text" id="settings-vault-label" name="label" placeholder="{{localize 'SETTINGS_VAULT.App.labelPlaceholder'}}">
+    </div>
+
+    <div class="form-group">
+      <label for="settings-vault-secrets">{{localize "SETTINGS_VAULT.App.includeSecrets"}}</label>
+      <input type="checkbox" id="settings-vault-secrets" name="includeSecrets">
+      <p class="notes">{{localize "SETTINGS_VAULT.App.includeSecretsHint" count=secretCount}}</p>
+    </div>
+
+    <button type="button" data-action="exportProfile">
+      <i class="fa-solid fa-file-arrow-down"></i>
+      {{localize "SETTINGS_VAULT.App.exportButton"}}
+    </button>
+  </fieldset>
+
+  <fieldset>
+    <legend>{{localize "SETTINGS_VAULT.App.import"}}</legend>
+
+    <div class="form-group">
+      <label for="settings-vault-file">{{localize "SETTINGS_VAULT.App.file"}}</label>
+      <input type="file" id="settings-vault-file" name="profileFile" accept="application/json,.json">
+    </div>
+
+    <p class="notes">{{localize "SETTINGS_VAULT.App.importHint"}}</p>
+
+    <button type="button" data-action="importProfile">
+      <i class="fa-solid fa-file-arrow-up"></i>
+      {{localize "SETTINGS_VAULT.App.importButton"}}
+    </button>
+  </fieldset>
+
+  {{#if report}}
+    <fieldset class="settings-vault__report">
+      <legend>{{localize "SETTINGS_VAULT.Report.title"}}</legend>
+
+      <p>{{localize "SETTINGS_VAULT.Report.applied" count=report.applied.length}}</p>
+
+      {{#if report.skipped.length}}
+        <p>{{localize "SETTINGS_VAULT.Report.skipped" count=report.skipped.length}}</p>
+        <ul class="settings-vault__skipped">
+          {{#each report.skipped}}
+            <li><code>{{this.id}}</code> — {{this.reason}}</li>
+          {{/each}}
+        </ul>
+      {{/if}}
+    </fieldset>
+  {{/if}}
+
+</section>
