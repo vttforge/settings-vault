@@ -13,3 +13,7 @@ dist
 
 # Local agent notes — never tracked
 .claude/
+
+# The SDK versions this module needs are not published yet, so a lockfile
+# here can only point at a local checkout. Track it again once they ship.
+pnpm-lock.yaml

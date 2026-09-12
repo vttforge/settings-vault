@@ -93,6 +93,10 @@ pnpm run build
 The versions in `package.json` are the next SDK release, not the current one.
 Until it publishes, point them at a local checkout of the SDK.
 
+`pnpm-lock.yaml` is untracked for the same reason: a lockfile resolved against
+a local checkout would carry someone's home directory. It goes back under git
+once the SDK release lands.
+
 Built with the [VTTForge SDK](https://github.com/vttforge/vttforge).
 
 ## Licence
