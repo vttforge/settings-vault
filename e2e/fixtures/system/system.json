@@ -1,0 +1,14 @@
+{
+  "id": "settings-vault-fixture",
+  "type": "system",
+  "title": "Settings Vault test system",
+  "description": "The smallest system a world can run on. It exists so the end-to-end check has a world, and it registers two settings so there is something for a profile to carry.",
+  "version": "1.0.0",
+  "compatibility": {
+    "minimum": "14",
+    "verified": "14"
+  },
+  "authors": [{ "name": "fcsouza" }],
+  "esmodules": ["main.mjs"],
+  "grid": { "type": 1, "distance": 5, "units": "ft", "diagonals": 0 }
+}

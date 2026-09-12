@@ -142,17 +142,29 @@ pnpm run build
 
 ## Running it in a real Foundry
 
-`pnpm run e2e` installs the built module into a Foundry v14 container, joins
-as the Gamemaster, and drives the module's own API: it reads the live settings
-registry, changes a value, applies a profile over it, and checks the value came
-back. It runs one real check against GitHub, seeds a higher version to draw the
-outdated row, opens both windows, and asserts the console stayed clean. 26
-checks.
+```bash
+pnpm run build
+set -a && . .env && set +a
+pnpm run e2e
+```
 
-This one is local only. Booting Foundry needs a licence and an account, so it
-cannot run in CI on a fresh clone. It borrows the SDK repo's container harness,
-which is not published, so it expects the SDK checked out beside this repo, or
-`VTTFORGE_REPO` pointing at it.
+It boots a Foundry v14 container, launches a world on a minimal test system
+under `e2e/fixtures/system`, installs the built module, joins as the Gamemaster
+and drives the module's own API. It reads the live settings registry, changes a
+value and applies a profile over it, runs one real check against GitHub, seeds a
+higher version to draw the outdated row, and confirms both refusals: a player
+cannot check, and a spent request budget stops the loop instead of caching a
+refusal against every remaining module. It opens both windows and asserts the
+console stayed clean. 26 checks.
+
+Local only. Booting Foundry needs a licence and an account, so this cannot run
+in CI on a fresh clone. It needs `docker` on the PATH, plus
+`FOUNDRY_LICENSE_KEY`, `FOUNDRY_USERNAME` and `FOUNDRY_PASSWORD` in the
+environment, and `FOUNDRY_ACCEPT_LICENSE=1` to say you accept Foundry's licence
+agreement. The container comes from `@vttforge/testing/container`.
+
+The first run downloads Foundry and takes a couple of minutes. Later runs reuse
+the data volume. `KEEP_FOUNDRY=1` leaves the container up for poking at.
 
 Built with the [VTTForge SDK](https://github.com/vttforge/vttforge).
 
