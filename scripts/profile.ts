@@ -17,12 +17,7 @@
  */
 import type { SettingScope } from '@vttforge/types';
 import { PROFILE_FORMAT } from './constants.js';
-import {
-  listSettings,
-  type RegisteredSetting,
-  readValue,
-  writeValue,
-} from './settings-registry.js';
+import { listSettings, readValue, type VaultSetting, writeValue } from './settings-registry.js';
 
 export interface ProfileEntry {
   /** `namespace.key`. */
@@ -69,7 +64,7 @@ export interface ImportReport {
  */
 const SECRET_PATTERN = /(api|access|auth|secret|token|password|passwd|credential|licen[cs]e)/i;
 
-export function looksSecret(setting: RegisteredSetting): boolean {
+export function looksSecret(setting: VaultSetting): boolean {
   return SECRET_PATTERN.test(setting.key);
 }
 

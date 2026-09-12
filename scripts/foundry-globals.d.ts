@@ -9,8 +9,8 @@
  * declaration `@vttforge/testing` ships, and `tsc` stops with TS2451.
  *
  * `@vttforge/types` covers `game`, `ui`, `CONFIG`, `CONST` and the hook map. It
- * does not yet describe the `foundry.*` namespace, so the handful of members
- * this module reaches for are narrowed below rather than left as `any`.
+ * does not yet describe the `foundry.*` namespace, so the two members this
+ * module reaches for are narrowed below rather than left as `any`.
  */
 import type { FoundryConfig, FoundryConstants, Game, HooksApi, UiApi } from '@vttforge/types';
 
@@ -20,9 +20,6 @@ interface FoundryNamespace {
       readonly DialogV2: {
         confirm(options: Record<string, unknown>): Promise<boolean>;
       };
-    };
-    readonly handlebars: {
-      renderTemplate(path: string, context: unknown): Promise<string>;
     };
   };
   readonly utils: {

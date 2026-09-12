@@ -3,14 +3,15 @@
  *
  * Foundry keeps every registered setting in one map, keyed `namespace.key`.
  * That map is the only way to find settings belonging to packages this module
- * knows nothing about, which is the whole job. Everything here reads it and
- * nothing here writes.
+ * knows nothing about, which is the whole job. `@vttforge/types` describes it,
+ * so nothing here declares a shape. Everything reads and nothing writes,
+ * except `writeValue`.
  */
-import type { SettingScope } from '@vttforge/types';
+import type { RegisteredSetting, SettingScope } from '@vttforge/types';
 import { CORE_NAMESPACES } from './constants.js';
 
-/** One registered setting, plus the value the world currently holds. */
-export interface RegisteredSetting {
+/** One registered setting, narrowed to what the vault needs from it. */
+export interface VaultSetting {
   /** `namespace.key`, the id Foundry files it under. */
   readonly id: string;
   readonly namespace: string;
@@ -22,57 +23,30 @@ export interface RegisteredSetting {
   readonly config: boolean;
 }
 
-interface SettingEntry {
-  namespace?: string;
-  key?: string;
-  scope?: SettingScope;
-  name?: string;
-  config?: boolean;
-}
-
-interface SettingsRegistry {
-  settings: Map<string, SettingEntry>;
-  get<T>(namespace: string, key: string): T;
-  set<T>(namespace: string, key: string, value: T): Promise<T>;
-}
-
-function registry(): SettingsRegistry {
-  const g = globalThis as { game?: { settings?: unknown } };
-  const settings = g.game?.settings as SettingsRegistry | undefined;
-  if (!settings?.settings) {
-    throw new Error('game.settings is not ready. Read settings during or after "init".');
-  }
-  return settings;
-}
-
-/** Split `namespace.key` on the first dot. A key may contain dots; a namespace may not. */
-function splitId(id: string): { namespace: string; key: string } {
-  const dot = id.indexOf('.');
-  if (dot < 0) return { namespace: id, key: '' };
-  return { namespace: id.slice(0, dot), key: id.slice(dot + 1) };
+function toVaultSetting(entry: RegisteredSetting): VaultSetting {
+  return {
+    id: entry.id,
+    namespace: entry.namespace,
+    key: entry.key,
+    scope: entry.scope,
+    name: entry.name,
+    config: entry.config ?? false,
+  };
 }
 
 /**
  * Every setting registered in this world, in registration order.
  *
- * Core's own settings are left out. They describe the world, not a package, and
- * carrying them to another world would overwrite things like the active system
- * or the permission table.
+ * Core's own settings are left out. They describe the world, not a package,
+ * and carrying them to another world would overwrite things like the active
+ * system or the permission table.
  */
-export function listSettings(): RegisteredSetting[] {
-  const out: RegisteredSetting[] = [];
-  for (const [id, entry] of registry().settings) {
-    const { namespace, key } = splitId(id);
-    if (CORE_NAMESPACES.has(namespace)) continue;
-    if (key === '') continue;
-    out.push({
-      id,
-      namespace,
-      key,
-      scope: entry.scope ?? 'world',
-      name: entry.name,
-      config: entry.config ?? false,
-    });
+export function listSettings(): VaultSetting[] {
+  const out: VaultSetting[] = [];
+  for (const entry of game.settings.settings.values()) {
+    if (CORE_NAMESPACES.has(entry.namespace)) continue;
+    if (entry.key === '') continue;
+    out.push(toVaultSetting(entry));
   }
   return out;
 }
@@ -85,19 +59,18 @@ export function listNamespaces(): string[] {
 /**
  * The current value of a setting.
  *
- * Foundry throws when a setting was never registered. A package can also throw
- * from its own getter. Either way the caller gets `undefined` and keeps going,
- * because one broken setting must not stop a whole export.
+ * A package can throw from its own getter. The caller gets `undefined` and
+ * keeps going, because one broken setting must not stop a whole export.
  */
-export function readValue(setting: RegisteredSetting): unknown {
+export function readValue(setting: VaultSetting): unknown {
   try {
-    return registry().get(setting.namespace, setting.key);
+    return game.settings.get(setting.namespace, setting.key);
   } catch {
     return undefined;
   }
 }
 
 /** Write one value back. Throws when the value fails the registered type. */
-export function writeValue(setting: RegisteredSetting, value: unknown): Promise<unknown> {
-  return registry().set(setting.namespace, setting.key, value);
+export function writeValue(setting: VaultSetting, value: unknown): Promise<unknown> {
+  return game.settings.set(setting.namespace, setting.key, value);
 }

@@ -1,7 +1,3 @@
-// biome-ignore-all lint/complexity/noThisInStatic: ApplicationV2 calls an
-// action handler with `this` bound to the instance, so a handler declared
-// static still reads instance state. Following the rule's fix here and
-// writing `VaultApp.#selected()` would compile and then fail at runtime.
 /**
  * The vault window.
  *
@@ -9,12 +5,8 @@
  * see what landed. The report matters as much as the import. A GM restoring a
  * profile needs to know which keys did not make it and why, and a silent
  * success would hide exactly the cases worth knowing about.
- *
- * Built on `BaseApplication` rather than a Handlebars base. The SDK ships the
- * Handlebars mixin only for actor and item sheets, so a standalone templated
- * window renders its one template here and hands the element back.
  */
-import { BaseApplication } from '@vttforge/core';
+import { BaseHandlebarsApplication } from '@vttforge/core';
 import { MODULE_ID } from '../constants.js';
 import {
   applyProfile,
@@ -60,7 +52,7 @@ function namespaceRows(): NamespaceRow[] {
     .sort((a, b) => a.title.localeCompare(b.title));
 }
 
-export class VaultApp extends BaseApplication() {
+export class VaultApp extends BaseHandlebarsApplication() {
   static DEFAULT_OPTIONS = {
     id: 'settings-vault',
     classes: ['settings-vault'],
@@ -81,20 +73,18 @@ export class VaultApp extends BaseApplication() {
   /** The last import's outcome, shown until the next one. */
   #report: ImportReport | undefined;
 
-  async _renderHTML(): Promise<HTMLElement> {
+  static PARTS = {
+    body: { template: `modules/${MODULE_ID}/templates/vault.hbs` },
+  };
+
+  override async _prepareContext(): Promise<Record<string, unknown>> {
     const rows = namespaceRows();
-    const html = await foundry.applications.handlebars.renderTemplate(
-      `modules/${MODULE_ID}/templates/vault.hbs`,
-      {
-        rows,
-        hasRows: rows.length > 0,
-        secretCount: rows.reduce((n, r) => n + r.secrets, 0),
-        report: this.#report,
-      },
-    );
-    const wrapper = document.createElement('div');
-    wrapper.innerHTML = html;
-    return wrapper;
+    return {
+      rows,
+      hasRows: rows.length > 0,
+      secretCount: rows.reduce((n, r) => n + r.secrets, 0),
+      report: this.#report,
+    };
   }
 
   /** The window root. Reading it before a render is a programming error. */

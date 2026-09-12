@@ -90,6 +90,9 @@ pnpm run build
 
 `pnpm run build` writes `dist/` and a release zip with the manifest at the root.
 
+The versions in `package.json` are the next SDK release, not the current one.
+Until it publishes, point them at a local checkout of the SDK.
+
 Built with the [VTTForge SDK](https://github.com/vttforge/vttforge).
 
 ## Licence
