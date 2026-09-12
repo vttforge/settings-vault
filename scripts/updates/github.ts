@@ -16,6 +16,20 @@
  * guessed at.
  */
 
+/**
+ * GitHub refused because the hourly budget is spent.
+ *
+ * Its own class because the caller has to stop, not carry on. Every request
+ * after this one gets the same answer, and storing that answer against each
+ * remaining module would mark them checked for a day when none of them were.
+ */
+export class RateLimitError extends Error {
+  constructor() {
+    super("GitHub's hourly request budget is spent. Try again later.");
+    this.name = 'RateLimitError';
+  }
+}
+
 /** An owner and a repository, the two halves of a GitHub API path. */
 export interface Repo {
   readonly owner: string;
@@ -93,12 +107,12 @@ export async function latestRelease(repo: Repo): Promise<Release> {
     throw new Error('no published release');
   }
   if (response.status === 403 || response.status === 429) {
+    // A 429 is always the limit. A 403 is the limit when the header says so,
+    // and something else otherwise, so the two are told apart rather than
+    // lumped together.
     const remaining = response.headers.get('x-ratelimit-remaining');
-    throw new Error(
-      remaining === '0'
-        ? "GitHub's hourly request budget is spent. Try again later."
-        : `GitHub refused the request (${response.status}).`,
-    );
+    if (response.status === 429 || remaining === '0') throw new RateLimitError();
+    throw new Error(`GitHub refused the request (${response.status}).`);
   }
   if (!response.ok) {
     throw new Error(`GitHub answered ${response.status}.`);

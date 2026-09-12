@@ -13,7 +13,7 @@
  */
 
 import { CACHE_SETTING, CORE_NAMESPACES, MAX_REQUESTS, MODULE_ID, TTL_MS } from '../constants.js';
-import { latestRelease, type Repo, repoFromUrl } from './github.js';
+import { latestRelease, RateLimitError, type Repo, repoFromUrl } from './github.js';
 
 /** What one module's check produced, as it is stored. */
 export interface CachedRelease {
@@ -107,31 +107,46 @@ function isFresh(entry: CachedRelease | undefined, now: number): boolean {
  * is reused and costs no request.
  */
 export async function checkUpdates({ force = false } = {}): Promise<UpdateReport> {
+  // Only a GM can write a world setting, and this writes one at the end. Refuse
+  // before spending a single request rather than after spending forty.
+  if (!game.user?.isGM) {
+    throw new Error('Only a Gamemaster can check for updates: the result is stored in the world.');
+  }
+
   const now = Date.now();
   const cache = readCache();
   const entries: Record<string, CachedRelease> = { ...cache.entries };
   const modules = checkable();
 
+  // Everything that would cost a request, decided before any is made, so what
+  // is left over when the loop stops early can be counted.
+  const pending = modules.filter(
+    (module) => module.repo && (force || !isFresh(entries[module.id], now)),
+  );
+  const budget = pending.slice(0, MAX_REQUESTS);
+  let skippedForBudget = pending.length - budget.length;
   let spent = 0;
-  let skippedForBudget = 0;
 
-  for (const module of modules) {
-    if (!module.repo) continue;
-    if (!force && isFresh(entries[module.id], now)) continue;
-    if (spent >= MAX_REQUESTS) {
-      skippedForBudget += 1;
-      continue;
-    }
+  for (const [index, module] of budget.entries()) {
+    // Narrowed by the filter above; `pending` holds only modules with a repo.
+    const repo = module.repo as Repo;
     spent += 1;
     const fetchedAt = new Date().toISOString();
     try {
-      const release = await latestRelease(module.repo);
+      const release = await latestRelease(repo);
       entries[module.id] = { ...release, error: null, fetchedAt };
     } catch (error) {
+      if (error instanceof RateLimitError) {
+        // Every request after this one gets the same refusal. Stop, and count
+        // this module and the rest as unchecked instead of writing a cache
+        // entry that would claim they were looked at for the next day.
+        skippedForBudget += budget.length - index;
+        break;
+      }
       entries[module.id] = {
         version: null,
         notes: '',
-        url: `https://github.com/${module.repo.owner}/${module.repo.repo}`,
+        url: `https://github.com/${repo.owner}/${repo.repo}`,
         publishedAt: null,
         error: error instanceof Error ? error.message : String(error),
         fetchedAt,

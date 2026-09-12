@@ -348,6 +348,67 @@ try {
     `${persisted} vs ${checked.checkedAt}`,
   );
 
+  // A player cannot check, because the result lands in a world setting. The
+  // refusal has to come before any request is spent, so this asserts it throws
+  // rather than that it fails at the write.
+  const asPlayer = await page.evaluate(async (id) => {
+    const real = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(game.user), 'isGM');
+    Object.defineProperty(game.user, 'isGM', { get: () => false, configurable: true });
+    try {
+      await game.modules.get(id).api.checkUpdates({ force: true });
+      return { threw: false, message: '' };
+    } catch (err) {
+      return { threw: true, message: String(err?.message ?? err) };
+    } finally {
+      delete game.user.isGM;
+      if (real) Object.defineProperty(game.user, 'isGM', real);
+    }
+  }, MODULE_ID);
+  check(
+    'a player is refused before any request is spent',
+    asPlayer.threw && asPlayer.message.includes('Gamemaster'),
+    asPlayer.message,
+  );
+  check(
+    'the refusal did not leave the user stuck as a player',
+    await page.evaluate(() => game.user.isGM === true),
+  );
+
+  // A spent budget stops the loop. Every request after the first refusal gets
+  // the same answer, and caching that answer against each remaining module
+  // would mark them checked for a day when none of them were.
+  const limited = await page.evaluate(async (id) => {
+    await game.settings.set(id, 'updateCache', { checkedAt: null, entries: {} });
+    const realFetch = globalThis.fetch;
+    let calls = 0;
+    globalThis.fetch = (input, init) => {
+      const url = typeof input === 'string' ? input : (input?.url ?? '');
+      if (url.startsWith('https://api.github.com/')) {
+        calls += 1;
+        return Promise.resolve(
+          new Response('{}', { status: 403, headers: { 'x-ratelimit-remaining': '0' } }),
+        );
+      }
+      return realFetch(input, init);
+    };
+    try {
+      const report = await game.modules.get(id).api.checkUpdates({ force: true });
+      const cache = game.settings.get(id, 'updateCache');
+      return {
+        calls,
+        skippedForBudget: report.skippedForBudget,
+        cached: Object.keys(cache.entries).length,
+      };
+    } finally {
+      globalThis.fetch = realFetch;
+    }
+  }, MODULE_ID);
+  check(
+    'a spent budget stops after one request and caches nothing',
+    limited.calls === 1 && limited.cached === 0 && limited.skippedForBudget >= 1,
+    JSON.stringify(limited),
+  );
+
   // Seed the cache with a version above the installed one, so the outdated
   // path and the notes block are actually exercised. Nothing else in this world
   // has a newer release to find.

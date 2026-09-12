@@ -62,7 +62,9 @@ modules would burn half of that on every check.
 
 So nothing checks on its own. A result is kept for a day, opening the window
 costs nothing, and the button asks for a fresh one. If a check runs out of
-budget it says how many modules it left out.
+budget it stops there and says how many modules it left out. It does not keep
+asking and it does not record a refusal as though those modules had been
+checked.
 
 A personal access token would raise the ceiling. It would also mean this module
 storing a credential, which is the thing the section below exists to keep out of
@@ -111,7 +113,8 @@ vault.open();
 const report = vault.lastReport();
 console.log(report.outdatedCount, report.checkedAt);
 
-// Ask GitHub. One request per module with a release page.
+// Ask GitHub. One request per module with a release page. GM only, because
+// the result is stored in the world.
 await vault.checkUpdates({ force: true });
 
 // Open the updates window.
@@ -143,7 +146,7 @@ pnpm run build
 as the Gamemaster, and drives the module's own API: it reads the live settings
 registry, changes a value, applies a profile over it, and checks the value came
 back. It runs one real check against GitHub, seeds a higher version to draw the
-outdated row, opens both windows, and asserts the console stayed clean. 23
+outdated row, opens both windows, and asserts the console stayed clean. 26
 checks.
 
 This one is local only. Booting Foundry needs a licence and an account, so it
