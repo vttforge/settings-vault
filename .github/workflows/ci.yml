@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 26
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm run typecheck
+
+      - run: pnpm run lint
+
+      # Builds the release zip, which is what a player installs. A build that
+      # only emits dist/ would not catch a manifest the zip cannot carry.
+      - name: Build
+        env:
+          VTTFORGE_MANIFEST_URL: https://github.com/${{ github.repository }}/releases/latest/download/module.json
+          VTTFORGE_DOWNLOAD_URL: https://github.com/${{ github.repository }}/releases/download/v0.0.0/settings-vault-{version}.zip
+        run: pnpm run build
+
+      # The manifest has to sit at the zip root. Foundry finds a package by
+      # `<root>/module.json` and nowhere else, so a wrapper directory makes
+      # the zip silently uninstallable.
+      - name: The manifest sits at the zip root
+        run: |
+          unzip -l settings-vault-*.zip
+          unzip -p settings-vault-*.zip module.json > /dev/null
