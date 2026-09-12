@@ -1,0 +1,70 @@
+<section class="settings-vault__body">
+
+  <div class="settings-vault__bulk">
+    <button type="button" data-action="refresh" {{#if checking}}disabled{{/if}}>
+      <i class="fa-solid fa-arrows-rotate"></i>
+      {{#if checking}}
+        {{localize "SETTINGS_VAULT.Updates.checking"}}
+      {{else}}
+        {{localize "SETTINGS_VAULT.Updates.checkNow"}}
+      {{/if}}
+    </button>
+    {{#if checkedAt}}
+      <span class="notes">{{localize "SETTINGS_VAULT.Updates.lastChecked" when=checkedAt}}</span>
+    {{else}}
+      <span class="notes">{{localize "SETTINGS_VAULT.Updates.never"}}</span>
+    {{/if}}
+  </div>
+
+  {{#if outdatedCount}}
+    <p>{{localize "SETTINGS_VAULT.Updates.outdated" count=outdatedCount}}</p>
+  {{/if}}
+
+  {{#if skippedForBudget}}
+    <p class="notes">{{localize "SETTINGS_VAULT.Updates.budget" count=skippedForBudget}}</p>
+  {{/if}}
+
+  {{#if hasRows}}
+    <ul class="settings-vault__updates">
+      {{#each rows}}
+        <li class="{{#if this.outdated}}settings-vault__update--outdated{{/if}}">
+          <div class="settings-vault__update-head">
+            <span class="settings-vault__title">{{this.title}}</span>
+            <span class="settings-vault__version">
+              {{#if this.outdated}}
+                {{this.installed}} &rarr; <strong>{{this.latest}}</strong>
+              {{else if this.latest}}
+                {{localize "SETTINGS_VAULT.Updates.current" version=this.installed}}
+              {{else}}
+                {{this.installed}}
+              {{/if}}
+            </span>
+          </div>
+
+          {{#if this.reason}}
+            <p class="notes">{{this.reason}}</p>
+          {{/if}}
+
+          {{#if this.outdated}}
+            {{#if this.notes}}
+              <details>
+                <summary>{{localize "SETTINGS_VAULT.Updates.whatChanged"}}</summary>
+                <pre class="settings-vault__notes">{{this.notes}}</pre>
+              </details>
+            {{/if}}
+            {{#if this.url}}
+              <a href="{{this.url}}" target="_blank" rel="noopener noreferrer">
+                {{localize "SETTINGS_VAULT.Updates.openRelease"}}
+              </a>
+            {{/if}}
+          {{/if}}
+        </li>
+      {{/each}}
+    </ul>
+  {{else}}
+    <p class="notes">{{localize "SETTINGS_VAULT.Updates.empty"}}</p>
+  {{/if}}
+
+  <p class="notes">{{localize "SETTINGS_VAULT.Updates.howItWorks"}}</p>
+
+</section>

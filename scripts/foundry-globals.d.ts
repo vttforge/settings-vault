@@ -12,7 +12,14 @@
  * does not yet describe the `foundry.*` namespace, so the two members this
  * module reaches for are narrowed below rather than left as `any`.
  */
-import type { FoundryConfig, FoundryConstants, Game, HooksApi, UiApi } from '@vttforge/types';
+import type {
+  FoundryConfig,
+  FoundryConstants,
+  FoundryUtils,
+  Game,
+  HooksApi,
+  UiApi,
+} from '@vttforge/types';
 
 interface FoundryNamespace {
   readonly applications: {
@@ -22,7 +29,12 @@ interface FoundryNamespace {
       };
     };
   };
-  readonly utils: {
+  /**
+   * `FoundryUtils` covers what the docs describe. The two file helpers are not
+   * in it, so they are added here rather than replacing the whole type with a
+   * hand-written one.
+   */
+  readonly utils: FoundryUtils & {
     saveDataToFile(data: string, type: string, filename: string): void;
     readTextFromFile(file: File): Promise<string>;
   };
