@@ -13,9 +13,7 @@
       "name": "fcsouza"
     }
   ],
-  "esmodules": [
-    "main.mjs"
-  ],
+  "esmodules": ["main.mjs"],
   "styles": [
     {
       "src": "styles/main.css",
@@ -31,16 +29,8 @@
   ],
   "flags": {
     "hotReload": {
-      "extensions": [
-        "css",
-        "hbs",
-        "json"
-      ],
-      "paths": [
-        "styles",
-        "templates",
-        "lang"
-      ]
+      "extensions": ["css", "hbs", "json"],
+      "paths": ["styles", "templates", "lang"]
     }
   },
   "url": "https://github.com/vttforge/settings-vault",
