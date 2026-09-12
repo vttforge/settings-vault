@@ -2,10 +2,8 @@
   "SETTINGS_VAULT.Menu.name": "Settings Vault",
   "SETTINGS_VAULT.Menu.label": "Open the vault",
   "SETTINGS_VAULT.Menu.hint": "Write module settings to a file, and read one back into this world.",
-
   "SETTINGS_VAULT.Keybinding.open.name": "Open Settings Vault",
   "SETTINGS_VAULT.Keybinding.open.hint": "Opens the vault window. No key is bound by default.",
-
   "SETTINGS_VAULT.App.title": "Settings Vault",
   "SETTINGS_VAULT.App.packages": "Packages",
   "SETTINGS_VAULT.App.selectAll": "Select all",
@@ -14,29 +12,42 @@
   "SETTINGS_VAULT.App.countWorld": "{count} world",
   "SETTINGS_VAULT.App.countClient": "{count} client",
   "SETTINGS_VAULT.App.countUser": "{count} user",
-
   "SETTINGS_VAULT.App.export": "Export",
   "SETTINGS_VAULT.App.label": "Label",
   "SETTINGS_VAULT.App.labelPlaceholder": "What this profile is for",
   "SETTINGS_VAULT.App.includeSecrets": "Include values that look like credentials",
   "SETTINGS_VAULT.App.includeSecretsHint": "{count} setting(s) have a key naming a token, password or licence. They stay out of the file unless you tick this. Read a profile before you share it.",
   "SETTINGS_VAULT.App.exportButton": "Write a profile",
-
   "SETTINGS_VAULT.App.import": "Import",
   "SETTINGS_VAULT.App.file": "Profile file",
   "SETTINGS_VAULT.App.importHint": "World settings apply to everyone. Client settings land on this device. User settings land on you, because Foundry writes them against the logged-in user and offers no way to write another user's.",
   "SETTINGS_VAULT.App.importButton": "Read a profile",
-
   "SETTINGS_VAULT.Confirm.title": "Apply this profile?",
   "SETTINGS_VAULT.Confirm.body": "This writes {count} value(s) over what the world holds now. Export first if you want a way back.",
-
   "SETTINGS_VAULT.Report.title": "Last import",
   "SETTINGS_VAULT.Report.applied": "{count} value(s) applied.",
   "SETTINGS_VAULT.Report.skipped": "{count} skipped:",
-
   "SETTINGS_VAULT.Notify.nothingPicked": "Pick at least one package.",
   "SETTINGS_VAULT.Notify.exported": "Wrote {count} value(s).",
   "SETTINGS_VAULT.Notify.noFile": "Choose a profile file first.",
   "SETTINGS_VAULT.Notify.unreadable": "That file is not valid JSON.",
-  "SETTINGS_VAULT.Notify.wrongFormat": "That file is not a Settings Vault profile."
+  "SETTINGS_VAULT.Notify.wrongFormat": "That file is not a Settings Vault profile.",
+  "SETTINGS_VAULT.UpdatesMenu.name": "Module updates",
+  "SETTINGS_VAULT.UpdatesMenu.label": "Check for updates",
+  "SETTINGS_VAULT.UpdatesMenu.hint": "See which installed modules have a newer release, and what changed.",
+  "SETTINGS_VAULT.Keybinding.updates.name": "Open Module Updates",
+  "SETTINGS_VAULT.Keybinding.updates.hint": "Opens the updates window. No key is bound by default.",
+  "SETTINGS_VAULT.Updates.title": "Module Updates",
+  "SETTINGS_VAULT.Updates.checkNow": "Check now",
+  "SETTINGS_VAULT.Updates.checking": "Checking...",
+  "SETTINGS_VAULT.Updates.lastChecked": "Last checked {when}.",
+  "SETTINGS_VAULT.Updates.never": "Not checked in this world yet.",
+  "SETTINGS_VAULT.Updates.outdated": "{count} module(s) have a newer release.",
+  "SETTINGS_VAULT.Updates.current": "{version}, up to date",
+  "SETTINGS_VAULT.Updates.whatChanged": "What changed",
+  "SETTINGS_VAULT.Updates.openRelease": "Open the release page",
+  "SETTINGS_VAULT.Updates.empty": "No other module is installed in this world.",
+  "SETTINGS_VAULT.Updates.budget": "{count} module(s) were left out of this check. GitHub allows a limited number of requests an hour. Press check again later.",
+  "SETTINGS_VAULT.Updates.failed": "The check failed: {reason}",
+  "SETTINGS_VAULT.Updates.howItWorks": "Releases are read from GitHub, once a day at most, and only when you ask. A module hosted elsewhere cannot be checked from inside a world. Nothing here installs anything: use Foundry's own module installer."
 }

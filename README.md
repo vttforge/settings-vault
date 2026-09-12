@@ -1,11 +1,12 @@
 # Settings Vault
 
-Write the module settings of a Foundry world to a file, and read that file into
-another world.
+Write the module settings of a Foundry world to a file, read that file into
+another world, and see which of your modules have a newer release.
 
 Setting up thirty modules takes an evening. Starting a new world means doing it
 again from memory. This module writes what you configured to a JSON file you
-keep, and puts it back when you need it.
+keep, and puts it back when you need it. It also tells you when one of those
+thirty has shipped a new version, and what changed in it.
 
 Foundry VTT v14 or later. GM only.
 
@@ -38,6 +39,44 @@ them.
 The window shows the count per scope for each package, so you know what a
 profile will carry before you write it.
 
+## Module updates
+
+Open **Settings → Configure Settings → Check for updates**.
+
+The list shows every installed module, the version this world runs, and the
+newest release found. A module that is behind shows the new version, the release
+notes, and a link to the release page. Nothing here installs anything: use
+Foundry's own module installer for that.
+
+Releases are read from GitHub. That is not a preference. A browser can only
+fetch what a server allows it to, and of the three places a version could come
+from, one sends no permission header, one answers 404, and `api.github.com`
+answers with the tag and the notes together. A module hosted anywhere else is
+listed as unchecked, with the reason.
+
+### Why there is a button
+
+GitHub allows a browser sixty requests an hour without a token, and a
+conditional request that comes back "not modified" still spends one. Thirty
+modules would burn half of that on every check.
+
+So nothing checks on its own. A result is kept for a day, opening the window
+costs nothing, and the button asks for a fresh one. If a check runs out of
+budget it stops there and says how many modules it left out. It does not keep
+asking and it does not record a refusal as though those modules had been
+checked.
+
+A personal access token would raise the ceiling. It would also mean this module
+storing a credential, which is the thing the section below exists to keep out of
+a file. So there is no token setting.
+
+### Tags that are not versions
+
+The newest release of a monorepo can be tagged `@scope/name@0.6.0`. That is a
+tag, not a version, and comparing it to `0.1.0` produces an answer with no
+meaning. A tag that does not start with a version is reported as unreadable
+rather than shown as the version to upgrade to.
+
 ## Credentials
 
 Some modules keep an API token or a licence key in a setting. Values whose key
@@ -67,8 +106,19 @@ const profile = vault.buildProfile({ namespaces: ['some-module'] });
 const report = await vault.applyProfile(profile);
 console.log(report.applied.length, report.skipped);
 
-// Open the window.
+// Open the profile window.
 vault.open();
+
+// What the last update check found. Asks GitHub nothing.
+const report = vault.lastReport();
+console.log(report.outdatedCount, report.checkedAt);
+
+// Ask GitHub. One request per module with a release page. GM only, because
+// the result is stored in the world.
+await vault.checkUpdates({ force: true });
+
+// Open the updates window.
+vault.openUpdates();
 ```
 
 ## Install
@@ -95,7 +145,9 @@ pnpm run build
 `pnpm run e2e` installs the built module into a Foundry v14 container, joins
 as the Gamemaster, and drives the module's own API: it reads the live settings
 registry, changes a value, applies a profile over it, and checks the value came
-back. It also opens the window and asserts the console stayed clean.
+back. It runs one real check against GitHub, seeds a higher version to draw the
+outdated row, opens both windows, and asserts the console stayed clean. 26
+checks.
 
 This one is local only. Booting Foundry needs a licence and an account, so it
 cannot run in CI on a fresh clone. It borrows the SDK repo's container harness,
