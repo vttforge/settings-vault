@@ -15,9 +15,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # No `version` here: package.json's `packageManager` is the one source,
+      # and the action refuses both at once.
       - uses: pnpm/action-setup@v4
-        with:
-          version: 11
 
       - uses: actions/setup-node@v4
         with:
