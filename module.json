@@ -3,7 +3,7 @@
   "type": "module",
   "title": "Settings Vault",
   "description": "Export module settings to a file, read one back into another world, and see which modules have a newer release.",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "compatibility": {
     "minimum": "14",
     "verified": "14"

@@ -1,53 +1,106 @@
 name: Release
 
+# The merge cuts the release, not a tag pushed by hand.
+#
+# A push to main whose `package.json` version has no tag yet builds the zip,
+# creates the tag and opens the release. A version that is already tagged does
+# nothing, so every other merge is a no-op and a re-run is harmless.
+#
+# The `v*` trigger stays for the two cases the merge cannot cover: re-cutting a
+# release that failed halfway, and tagging an older commit. Pushing the tag from
+# this workflow does not start a second run, because GitHub does not trigger
+# workflows on its own token.
 on:
   push:
+    branches:
+      - main
     tags:
       - 'v*'
+  workflow_dispatch: {}
 
 permissions:
   contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
   release:
     runs-on: ubuntu-latest
     steps:
+      # Whole history: the tag push below goes to a remote that refuses a
+      # shallow update, and the release notes are generated from the log.
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Resolve version from tag
+      - name: Resolve the version, and stop if it is already released
         id: version
         env:
           REF: ${{ github.ref_name }}
+          REF_TYPE: ${{ github.ref_type }}
         run: |
-          version="${REF#v}"
-          # Git allows surprising characters in tag names. Reject anything
-          # that isn't a strict semver-ish identifier so downstream node -e
-          # / shell interpolations can't be turned into command injection
-          # by a malicious tag push.
+          if [ "$REF_TYPE" = "tag" ]; then
+            version="${REF#v}"
+          else
+            version="$(node -p "require('./package.json').version")"
+          fi
+          # Git allows surprising characters in tag names, and the version
+          # reaches a shell interpolation below. Reject anything that is not a
+          # strict semver-ish identifier, so a tag cannot carry a command.
           if ! [[ "$version" =~ ^[0-9A-Za-z._+-]+$ ]]; then
-            echo "Refusing tag with unsafe characters: $version" >&2
+            echo "Refusing a version with unsafe characters: $version" >&2
             exit 1
           fi
           echo "version=$version" >> "$GITHUB_OUTPUT"
 
+          # On a tag push the tag exists by definition. On a push to main it
+          # existing means this version was released already, which is every
+          # merge that does not bump the version.
+          if [ "$REF_TYPE" != "tag" ] && git ls-remote --exit-code --tags origin "refs/tags/v$version" >/dev/null 2>&1; then
+            echo "v$version is already tagged. Nothing to release."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - uses: pnpm/action-setup@v4
+        if: steps.version.outputs.skip == 'false'
 
       - uses: actions/setup-node@v4
+        if: steps.version.outputs.skip == 'false'
         with:
           node-version: 26
 
       - run: pnpm install
+        if: steps.version.outputs.skip == 'false'
 
+      # On a tag push the tag is the source of the version, so write it into
+      # `package.json` before the build reads it. On a push to main the two
+      # already agree and this changes nothing.
       - name: Sync manifest version
+        if: steps.version.outputs.skip == 'false'
         env:
           VERSION: ${{ steps.version.outputs.version }}
         run: |
           node -e "const fs=require('node:fs');const p=JSON.parse(fs.readFileSync('package.json','utf8'));p.version=process.env.VERSION;fs.writeFileSync('package.json',JSON.stringify(p,null,2)+'\n');"
 
+      # The gate a released build passes through. CI covers every pull request,
+      # and this covers what is about to be handed to people.
+      - name: Typecheck
+        if: steps.version.outputs.skip == 'false'
+        run: pnpm run typecheck
+
+      - name: Test
+        if: steps.version.outputs.skip == 'false'
+        run: pnpm run test
+
       # `vttforge build` emits dist/ and zips it in one step. The plugin
       # writes the two release URLs into the manifest before the zip is made,
       # so the archive carries them.
       - name: Build
+        if: steps.version.outputs.skip == 'false'
         env:
           VERSION: ${{ steps.version.outputs.version }}
           REPO: ${{ github.repository }}
@@ -57,12 +110,25 @@ jobs:
           export VTTFORGE_DOWNLOAD_URL="https://github.com/$REPO/releases/download/v$VERSION/$PKG_ID-{version}.zip"
           pnpm build
 
+      # After the build, so a version that cannot be built is never tagged.
+      - name: Tag the version
+        if: steps.version.outputs.skip == 'false' && github.ref_type != 'tag'
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git tag "v$VERSION"
+          git push origin "v$VERSION"
+
       - name: Create GitHub Release
+        if: steps.version.outputs.skip == 'false'
         env:
           VERSION: ${{ steps.version.outputs.version }}
           PKG_ID: 'settings-vault'
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: v${{ steps.version.outputs.version }}
           files: |
             ${{ env.PKG_ID }}-${{ env.VERSION }}.zip
             dist/module.json
