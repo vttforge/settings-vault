@@ -9,5 +9,15 @@ import { defineConfig } from 'vite';
  * (instead of `system.json`) and to base chunk URLs at `/modules/settings-vault/`.
  */
 export default defineConfig({
-  plugins: [vttforge({ id: 'settings-vault', kind: 'module', entry: 'scripts/main.ts' })],
+  plugins: [
+    vttforge({
+      id: 'settings-vault',
+      kind: 'module',
+      entry: 'scripts/main.ts',
+      // `readme`, `changelog` e `license` no manifesto sao caminhos dentro da
+      // pasta do modulo, entao os tres arquivos tem que entrar no zip. A lista
+      // padrao do plugin nao os inclui, e nomear a lista substitui o padrao.
+      staticAssets: ['lang', 'templates', 'packs', 'README.md', 'CHANGELOG.md', 'LICENSE'],
+    }),
+  ],
 });

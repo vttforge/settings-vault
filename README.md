@@ -73,8 +73,8 @@ a file. So there is no token setting.
 ### Tags that are not versions
 
 The newest release of a monorepo can be tagged `@scope/name@0.6.0`. That is a
-tag, not a version, and comparing it to `0.1.0` produces an answer with no
-meaning. A tag that does not start with a version is reported as unreadable
+tag, not a version, and comparing it to an installed version produces an answer
+with no meaning. A tag that does not start with a version is reported as unreadable
 rather than shown as the version to upgrade to.
 
 ## Credentials
@@ -170,4 +170,6 @@ Built with the [VTTForge SDK](https://github.com/vttforge/vttforge).
 
 ## Licence
 
-MIT.
+MIT. See [LICENSE](LICENSE).
+
+Release notes are in [CHANGELOG.md](CHANGELOG.md).
