@@ -70,13 +70,22 @@ const url = foundry.baseUrl;
 console.log(`foundry at ${url} running ${foundry.system.id}@${foundry.system.version}`);
 
 const browser = await chromium.launch();
-const page = await browser.newPage();
-page.on('pageerror', (err) => console.log('[pageerror]', err.message));
+
+/** A page that reports the errors the module throws into the console. */
+const newPage = async () => {
+  const fresh = await browser.newPage();
+  fresh.on('pageerror', (err) => console.log('[pageerror]', err.message));
+  return fresh;
+};
+
+let page = await newPage();
 
 try {
   // Join as the Gamemaster, the same way the repo's own e2e tests do.
   const join = async () => {
-    await page.goto(`${url}/join`);
+    // A minute, not the default thirty seconds: the first request after a
+    // restart waits on Foundry finishing its world launch.
+    await page.goto(`${url}/join`, { timeout: 60_000 });
     await page.waitForSelector('form[name=join] input[name=username]');
     await page.fill('form[name=join] input[name=username]', 'Gamemaster');
     await page.click('form[name=join] button[name=join]');
@@ -90,13 +99,24 @@ try {
     await page.evaluate((id) => Boolean(game.modules.get(id)), MODULE_ID),
   );
 
-  if (!(await page.evaluate((id) => game.modules.get(id)?.active === true, MODULE_ID))) {
+  /**
+   * Enable the module in the world being joined, then rejoin so it loads.
+   *
+   * Module activation is world scoped, so every world this run visits needs
+   * this once.
+   */
+  const ensureActive = async () => {
+    const active = () =>
+      page.evaluate((id) => game.modules.get(id)?.active === true, MODULE_ID);
+    if (await active()) return;
     await page.evaluate(async (id) => {
       const configuration = game.settings.get('core', 'moduleConfiguration');
       await game.settings.set('core', 'moduleConfiguration', { ...configuration, [id]: true });
     }, MODULE_ID);
     await join();
-  }
+  };
+
+  await ensureActive();
 
   const active = await page.evaluate((id) => game.modules.get(id)?.active === true, MODULE_ID);
   check('the module is active in the world', active);
@@ -293,10 +313,18 @@ try {
     typeof checked.checkedAt === 'string' && checked.checkedAt.length > 0,
     String(checked.checkedAt),
   );
+  // The repository is public and has releases, so the row should name the
+  // latest one. A rate-limited reply is the other legal answer, and then the
+  // row carries a reason instead. What it may never do is stay blank.
   check(
-    'a repository with no readable release reports the reason, not a version',
-    own === null || (own.latest === null && typeof own.reason === 'string'),
+    'the row either names a release or says why it could not read one',
+    own !== null && (typeof own.latest === 'string' || typeof own.reason === 'string'),
     own ? `${own.id}: latest=${JSON.stringify(own.latest)} reason=${own.reason}` : 'own row absent',
+  );
+  check(
+    'the build under test is not behind the release it found',
+    own !== null && (own.latest === null || own.outdated === false),
+    own ? `installed ${own.installed}, latest ${JSON.stringify(own.latest)}` : 'own row absent',
   );
   check(
     'no row claims to be outdated without a version',
@@ -450,6 +478,72 @@ try {
 
   const consoleErrors = await page.evaluate(() => globalThis.__vaultErrors ?? []);
   check('no module error in the console', consoleErrors.length === 0, consoleErrors.join(' | '));
+
+  // --- two worlds ---
+  //
+  // Carrying settings from one world to another is what this module is for, and
+  // one world cannot show it. The harness declares a second world on the same
+  // system and launches it. Nothing from the first world comes along: the
+  // module starts disabled there and every world setting starts at its default.
+  //
+  // This runs last. The switch restarts Foundry, which drops the page session
+  // and everything the checks above set up.
+  const MARKER = 'moved-between-worlds';
+  const SECOND_WORLD = 'settings-vault-e2e-second';
+  const SCHEMA = 'settings-vault-fixture.schemaVersion';
+
+  const exported = await page.evaluate(
+    async ({ id, marker }) => {
+      await game.settings.set('settings-vault-fixture', 'schemaVersion', marker);
+      return JSON.stringify(game.modules.get(id).api.buildProfile({ label: 'crossing worlds' }));
+    },
+    { id: MODULE_ID, marker: MARKER },
+  );
+
+  foundry.createWorld({ id: SECOND_WORLD, title: 'Settings Vault, second world' });
+  await foundry.switchWorld(SECOND_WORLD);
+  check('the harness launched a second world', foundry.worldId === SECOND_WORLD, foundry.worldId);
+
+  // The restart took the server the old page was talking to. A fresh page
+  // starts without its session or its socket, both of which now point at a
+  // world that is gone.
+  await page.close();
+  page = await newPage();
+
+  await join();
+  await ensureActive();
+  check(
+    'the module loads in the second world too',
+    await page.evaluate((id) => game.modules.get(id)?.active === true, MODULE_ID),
+  );
+
+  const fresh = await page.evaluate(() =>
+    game.settings.get('settings-vault-fixture', 'schemaVersion'),
+  );
+  check('the new world starts at the defaults', fresh === '1.0.0', `schemaVersion is ${fresh}`);
+
+  const crossed = await page.evaluate(
+    async ({ id, json }) => {
+      const report = await game.modules.get(id).api.applyProfile(JSON.parse(json));
+      return {
+        applied: report.applied,
+        skipped: report.skipped,
+        value: game.settings.get('settings-vault-fixture', 'schemaVersion'),
+      };
+    },
+    { id: MODULE_ID, json: exported },
+  );
+  check(
+    'a profile from another world applies here',
+    crossed.value === MARKER,
+    `schemaVersion is ${JSON.stringify(crossed.value)}`,
+  );
+  check(
+    'and the report names the setting it wrote',
+    crossed.applied.includes(SCHEMA),
+    `${crossed.applied.length} applied, ${crossed.skipped.length} skipped`,
+  );
+  if (crossed.skipped.length) console.log('skipped:', JSON.stringify(crossed.skipped.slice(0, 5)));
 } catch (err) {
   console.log('\n--- threw ---');
   console.log(err?.message ?? String(err));
