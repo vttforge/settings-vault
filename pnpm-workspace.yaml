@@ -1,6 +1,6 @@
 minimumReleaseAgeExclude:
   - '@vttforge/cli@0.17.0 || 0.18.0'
   - '@vttforge/core@0.19.0 || 0.20.0'
-  - '@vttforge/types@0.3.0 || 0.4.0 || 0.5.0'
+  - '@vttforge/types@0.3.0 || 0.4.0 || 0.5.0 || 0.7.0'
   - '@vttforge/vite-plugin@0.6.0'
-  - '@vttforge/testing@0.8.0'
+  - '@vttforge/testing@0.8.0 || 0.10.0'

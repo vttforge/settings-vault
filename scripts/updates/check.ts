@@ -81,12 +81,11 @@ function checkable(): { id: string; title: string; version: string; repo: Repo |
   const out: { id: string; title: string; version: string; repo: Repo | undefined }[] = [];
   for (const handle of game.modules.values()) {
     if (CORE_NAMESPACES.has(handle.id)) continue;
-    const manifest = handle as unknown as { url?: string; manifest?: string };
     out.push({
       id: handle.id,
       title: handle.title,
       version: handle.version,
-      repo: repoFromUrl(manifest.url) ?? repoFromUrl(manifest.manifest),
+      repo: repoFromUrl(handle.url) ?? repoFromUrl(handle.manifest),
     });
   }
   return out.sort((a, b) => a.title.localeCompare(b.title));
