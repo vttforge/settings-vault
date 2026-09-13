@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.2.1
+
+Documentation only. Nothing the module does changed.
+
+The README that ships inside the package is the one people read: Foundry points
+at it from the manifest. It now opens with how to install, shows both windows,
+and drops the jargon from its headings. The macro example ran into an error
+when pasted: it declared the same name twice.
+
 ## 0.2.0
 
 First release.
