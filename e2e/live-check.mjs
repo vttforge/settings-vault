@@ -106,8 +106,7 @@ try {
    * this once.
    */
   const ensureActive = async () => {
-    const active = () =>
-      page.evaluate((id) => game.modules.get(id)?.active === true, MODULE_ID);
+    const active = () => page.evaluate((id) => game.modules.get(id)?.active === true, MODULE_ID);
     if (await active()) return;
     await page.evaluate(async (id) => {
       const configuration = game.settings.get('core', 'moduleConfiguration');
