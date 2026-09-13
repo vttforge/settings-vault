@@ -30,6 +30,8 @@ jobs:
 
       - run: pnpm run lint
 
+      - run: pnpm run test
+
       # Builds the release zip, which is what a player installs. A build that
       # only emits dist/ would not catch a manifest the zip cannot carry.
       - name: Build

@@ -9,10 +9,11 @@
   "scripts": {
     "build": "vttforge build",
     "dev": "vttforge dev",
-    "lint": "vttforge lint",
+    "e2e": "node e2e/live-check.mjs",
     "format": "vttforge lint --fix",
-    "typecheck": "tsc --noEmit",
-    "e2e": "node e2e/live-check.mjs"
+    "lint": "vttforge lint",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@vttforge/core": "^0.20.0"
@@ -20,11 +21,12 @@
   "devDependencies": {
     "@playwright/test": "^1.56.0",
     "@vttforge/cli": "^0.18.0",
-    "@vttforge/testing": "^0.11.0",
-    "@vttforge/types": "^0.7.0",
+    "@vttforge/testing": "^0.12.0",
+    "@vttforge/types": "^0.8.0",
     "@vttforge/vite-plugin": "^0.6.0",
     "typescript": "^5.4.0",
-    "vite": "^8.2.2"
+    "vite": "^8.2.2",
+    "vitest": "^5.0.0"
   },
   "engines": {
     "node": ">=26"
