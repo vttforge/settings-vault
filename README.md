@@ -4,6 +4,7 @@
 [![Foundry v14](https://img.shields.io/badge/Foundry-v14-informational)](https://foundryvtt.com/)
 [![Licence MIT](https://img.shields.io/badge/licence-MIT-blue)](LICENSE)
 [![Built with VTTForge](https://img.shields.io/badge/built%20with-VTTForge-8a2be2)](https://github.com/vttforge/vttforge)
+[![Downloads](https://img.shields.io/github/downloads/vttforge/settings-vault/total)](https://github.com/vttforge/settings-vault/releases)
 
 Write the module settings of a Foundry world to a file, read that file into
 another world, and see which of your modules have a newer release.
