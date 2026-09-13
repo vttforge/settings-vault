@@ -17,7 +17,9 @@ export default defineConfig({
       // `readme`, `changelog` e `license` no manifesto sao caminhos dentro da
       // pasta do modulo, entao os tres arquivos tem que entrar no zip. A lista
       // padrao do plugin nao os inclui, e nomear a lista substitui o padrao.
-      staticAssets: ['lang', 'templates', 'packs', 'README.md', 'CHANGELOG.md', 'LICENSE'],
+      // `docs` entra junto porque o README aponta para as imagens de la, e o
+      // Foundry le esse README de dentro da pasta do modulo.
+      staticAssets: ['lang', 'templates', 'packs', 'docs', 'README.md', 'CHANGELOG.md', 'LICENSE'],
     }),
   ],
 });
