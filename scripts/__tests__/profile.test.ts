@@ -172,7 +172,12 @@ describe('applyProfile', () => {
         { id: 'a-module.theme', scope: 'world', value: 42 },
         { id: 'b-module.difficulty', scope: 'world', value: 'hard' },
       ]),
-    );
+    ).finally(() => {
+      // `restore()` replaces the whole `game` object, so this would go with it
+      // anyway. Put it back here so the patch cannot outlive the test it is
+      // written for.
+      game.settings.set = write;
+    });
 
     expect(report.applied).toEqual(['b-module.difficulty']);
     expect(report.skipped).toEqual([{ id: 'a-module.theme', reason: 'this is not a theme' }]);

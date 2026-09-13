@@ -92,11 +92,19 @@ describe('readValue', () => {
     // One broken setting must not stop a whole export.
     register('some-module', 'theme');
     const [setting] = listSettings();
+    const read = game.settings.get;
     game.settings.get = () => {
       throw new Error('this package is having a bad day');
     };
 
-    expect(readValue(setting)).toBeUndefined();
+    try {
+      expect(readValue(setting)).toBeUndefined();
+    } finally {
+      // `restore()` replaces the whole `game` object, so this would go with it
+      // anyway. Put it back here so the patch cannot outlive the test it is
+      // written for.
+      game.settings.get = read;
+    }
   });
 });
 
