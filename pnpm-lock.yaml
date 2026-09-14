@@ -19,8 +19,8 @@ importers:
         specifier: ^0.18.0
         version: 0.18.0
       '@vttforge/testing':
-        specifier: ^0.12.0
-        version: 0.12.0
+        specifier: ^0.14.0
+        version: 0.14.0
       '@vttforge/types':
         specifier: ^0.8.0
         version: 0.8.0
@@ -381,9 +381,12 @@ packages:
   '@vttforge/core@0.20.0':
     resolution: {integrity: sha512-ehpp9DRuq6tVP2rdE0KpKqYD60JkSIJNhwr7u4Svb421kc42w9TiE6hUzgd32Go/WqezjgJHCe3lkjticcsSsQ==}
 
-  '@vttforge/testing@0.12.0':
-    resolution: {integrity: sha512-lwIvHO2yeiY84U4/bWmaW9eFTb/1PLpnLJyy1065ZdpTXlhGkldXoM4ZJw8ZqLhwr5PG+O4g6qO0pYmMXkJtgw==}
+  '@vttforge/testing@0.14.0':
+    resolution: {integrity: sha512-q/fSJVaxA16EPIziaidIpf/76a9/tOetz8RkNzSnCpcW8iY5OY5SMJwqir9p+bpk3iSQyV3yce0cREk+Emv96g==}
     engines: {node: '>=22.0.0'}
+
+  '@vttforge/types@0.11.0':
+    resolution: {integrity: sha512-eIJ/HQswHQYfEVIQS5rsBT82cSg3k+3Ya2KQYH3TJVVTS48rFm1kuuLeXZXWIVns6O2CiXXVMax9kV55M7ZjQQ==}
 
   '@vttforge/types@0.5.0':
     resolution: {integrity: sha512-Fv2e3nywD/W0fn+D7xPxehJN273Wcym+6I4/aKgz7NmE3h1yZ+2O8M4EIfmjwSwRWmZDHghoRVpChsGDcZ3zqQ==}
@@ -1219,9 +1222,11 @@ snapshots:
     dependencies:
       '@vttforge/types': 0.5.0
 
-  '@vttforge/testing@0.12.0':
+  '@vttforge/testing@0.14.0':
     dependencies:
-      '@vttforge/types': 0.8.0
+      '@vttforge/types': 0.11.0
+
+  '@vttforge/types@0.11.0': {}
 
   '@vttforge/types@0.5.0': {}
 

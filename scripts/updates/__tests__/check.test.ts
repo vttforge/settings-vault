@@ -10,40 +10,28 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { CACHE_SETTING, MODULE_ID } from '../../constants.js';
 import { checkUpdates, EMPTY_CACHE, lastReport, type UpdateCache } from '../check.js';
 
-/** One installed module, as Foundry builds a handle from a manifest. */
-interface Handle {
+/**
+ * One installed module, as Foundry builds a handle from a manifest.
+ *
+ * A type, not an interface. `MockModuleOptions` carries an index signature and
+ * an interface does not satisfy one, so an interface here fails to compile at
+ * the call below.
+ */
+type Handle = {
   id: string;
   title: string;
   version: string;
   url?: string;
   manifest?: string;
-}
+};
 
 const realFetch = globalThis.fetch;
 let mock: ReturnType<typeof withMockFoundry> | undefined;
 
-/**
- * `game.modules` as a collection the checker can walk.
- *
- * The mock's own collection answers `get`, which is what registration needs.
- * This walks every installed module, which is what a check needs.
- */
-function modules(handles: Handle[]) {
-  const map = new Map(handles.map((handle) => [handle.id, handle]));
-  return {
-    get: (id: string) => map.get(id),
-    has: (id: string) => map.has(id),
-    values: () => map.values(),
-    get size() {
-      return map.size;
-    },
-  };
-}
-
 function start(handles: Handle[], options: { isGM?: boolean } = {}): void {
   mock = withMockFoundry({
     user: { isGM: options.isGM ?? true },
-    game: { modules: modules(handles) },
+    modules: handles,
   });
   game.settings.register(MODULE_ID, CACHE_SETTING, {
     scope: 'world',
