@@ -10,20 +10,14 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { CACHE_SETTING, MODULE_ID } from '../../constants.js';
 import { checkUpdates, EMPTY_CACHE, lastReport, type UpdateCache } from '../check.js';
 
-/**
- * One installed module, as Foundry builds a handle from a manifest.
- *
- * A type, not an interface. `MockModuleOptions` carries an index signature and
- * an interface does not satisfy one, so an interface here fails to compile at
- * the call below.
- */
-type Handle = {
+/** One installed module, as Foundry builds a handle from a manifest. */
+interface Handle {
   id: string;
   title: string;
   version: string;
   url?: string;
   manifest?: string;
-};
+}
 
 const realFetch = globalThis.fetch;
 let mock: ReturnType<typeof withMockFoundry> | undefined;
