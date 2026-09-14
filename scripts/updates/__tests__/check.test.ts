@@ -5,8 +5,9 @@
  * spend as few of them as possible and to never claim a module was checked
  * when it was not, so the assertions count requests as much as they read rows.
  */
+
+import { afterEach, beforeEach, describe, expect, it, vi } from 'bun:test';
 import { withMockFoundry } from '@vttforge/testing/vitest';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { CACHE_SETTING, MODULE_ID } from '../../constants.js';
 import { checkUpdates, EMPTY_CACHE, lastReport, type UpdateCache } from '../check.js';
 

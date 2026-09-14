@@ -5,7 +5,7 @@
  * a module author fills in by hand, and `latestRelease` reads an answer from a
  * server that has every right to refuse.
  */
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'bun:test';
 import { latestRelease, RateLimitError, repoFromUrl } from '../github.js';
 
 const realFetch = globalThis.fetch;

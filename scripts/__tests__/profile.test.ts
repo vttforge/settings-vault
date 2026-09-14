@@ -5,8 +5,9 @@
  * import that stops on the first key it cannot write, are both worse than
  * useless, so both are pinned here.
  */
+
+import { afterEach, beforeEach, describe, expect, it } from 'bun:test';
 import { withMockFoundry } from '@vttforge/testing/vitest';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { PROFILE_FORMAT } from '../constants.js';
 import { applyProfile, buildProfile, isProfile, looksSecret } from '../profile.js';
 
@@ -134,7 +135,7 @@ describe('applyProfile', () => {
 
     expect(report.applied).toEqual(['a-module.theme', 'b-module.difficulty']);
     expect(report.skipped).toEqual([]);
-    expect(game.settings.get('a-module', 'theme')).toBe('dark');
+    expect(game.settings.get('a-module', 'theme') as string).toBe('dark');
   });
 
   it('skips a setting whose package is not installed here', async () => {
@@ -153,7 +154,7 @@ describe('applyProfile', () => {
 
     expect(report.applied).toEqual([]);
     expect(report.skipped).toEqual([{ id: 'a-module.theme', reason: 'scope changed to client' }]);
-    expect(game.settings.get('a-module', 'theme')).toBe('light');
+    expect(game.settings.get('a-module', 'theme') as string).toBe('light');
   });
 
   it('carries on past a value the setting refuses', async () => {
@@ -181,6 +182,6 @@ describe('applyProfile', () => {
 
     expect(report.applied).toEqual(['b-module.difficulty']);
     expect(report.skipped).toEqual([{ id: 'a-module.theme', reason: 'this is not a theme' }]);
-    expect(game.settings.get('b-module', 'difficulty')).toBe('hard');
+    expect(game.settings.get('b-module', 'difficulty') as string).toBe('hard');
   });
 });

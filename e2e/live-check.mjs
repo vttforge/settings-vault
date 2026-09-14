@@ -14,9 +14,9 @@
  *
  * Then:
  *
- *   pnpm run build
+ *   bun run build
  *   set -a && . .env && set +a
- *   pnpm run e2e
+ *   bun run e2e
  *
  * The first run downloads Foundry and takes a couple of minutes. Later runs
  * reuse the data volume.
