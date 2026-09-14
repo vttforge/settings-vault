@@ -6,8 +6,9 @@
  * way Foundry does, so these run against the same map the module reads in a
  * world.
  */
+
+import { afterEach, beforeEach, describe, expect, it } from 'bun:test';
 import { withMockFoundry } from '@vttforge/testing/vitest';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { listNamespaces, listSettings, readValue, writeValue } from '../settings-registry.js';
 
 let mock: ReturnType<typeof withMockFoundry> | undefined;
@@ -114,6 +115,6 @@ describe('writeValue', () => {
     const [setting] = listSettings();
 
     await writeValue(setting, 'dark');
-    expect(game.settings.get('some-module', 'theme')).toBe('dark');
+    expect(game.settings.get('some-module', 'theme') as string).toBe('dark');
   });
 });

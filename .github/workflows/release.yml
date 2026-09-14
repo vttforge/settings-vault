@@ -65,15 +65,10 @@ jobs:
             echo "skip=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - uses: pnpm/action-setup@v4
+      - uses: oven-sh/setup-bun@v2
         if: steps.version.outputs.skip == 'false'
 
-      - uses: actions/setup-node@v4
-        if: steps.version.outputs.skip == 'false'
-        with:
-          node-version: 26
-
-      - run: pnpm install
+      - run: bun install
         if: steps.version.outputs.skip == 'false'
 
       # On a tag push the tag is the source of the version, so write it into
@@ -90,11 +85,11 @@ jobs:
       # and this covers what is about to be handed to people.
       - name: Typecheck
         if: steps.version.outputs.skip == 'false'
-        run: pnpm run typecheck
+        run: bun run typecheck
 
       - name: Test
         if: steps.version.outputs.skip == 'false'
-        run: pnpm run test
+        run: bun run test
 
       # `vttforge build` emits dist/ and zips it in one step. The plugin
       # writes the two release URLs into the manifest before the zip is made,
@@ -108,7 +103,7 @@ jobs:
           VTTFORGE_MANIFEST_URL: https://github.com/${{ github.repository }}/releases/latest/download/module.json
         run: |
           export VTTFORGE_DOWNLOAD_URL="https://github.com/$REPO/releases/download/v$VERSION/$PKG_ID-{version}.zip"
-          pnpm build
+          bun run build
 
       # After the build, so a version that cannot be built is never tagged.
       - name: Tag the version

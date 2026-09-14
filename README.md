@@ -149,20 +149,20 @@ vault.openUpdates();
 ## Build from source
 
 ```bash
-pnpm install
-pnpm run typecheck
-pnpm run lint
-pnpm run build
+bun install
+bun run typecheck
+bun run lint
+bun run build
 ```
 
-`pnpm run build` writes `dist/` and a release zip with the manifest at the root.
+`bun run build` writes `dist/` and a release zip with the manifest at the root.
 
 ## Running it in a real Foundry
 
 ```bash
-pnpm run build
+bun run build
 set -a && . .env && set +a
-pnpm run e2e
+bun run e2e
 ```
 
 It boots a Foundry v14 container, launches a world on a minimal test system
