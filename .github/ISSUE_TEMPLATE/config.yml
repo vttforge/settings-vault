@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: An update row says "no published release" or "not a version"
+    url: https://github.com/vttforge/settings-vault#releases-it-cannot-read
+    about: That row reports what GitHub said about the other module's repository, not a fault here. The README explains each reason.
+  - name: A problem with Foundry VTT itself
+    url: https://foundryvtt.com/community/contact/
+    about: This module is not made by Foundry Gaming. Problems with Foundry itself go to them.

@@ -16,6 +16,8 @@ thirty has shipped a new version, and what changed in it.
 
 Foundry VTT v14 or later. GM only.
 
+Something broken, or an idea? [Open an issue](https://github.com/vttforge/settings-vault/issues/new/choose).
+
 ## Install
 
 In Foundry, open **Add-on Modules → Install Module**, paste this into the

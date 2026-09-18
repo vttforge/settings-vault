@@ -1,0 +1,69 @@
+name: An import left something out
+description: A profile loaded, but some settings did not come back, or came back wrong.
+title: "[import] "
+labels: ["question"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        After an import, the window lists every setting it applied and every one it skipped, with the reason. Most skips are on purpose, and the README explains them:
+
+        - **not registered in this world**: the module that owns the setting is not installed or not turned on here.
+        - **scope changed to ...**: that module now stores the setting somewhere else, so the old value would land in the wrong place.
+        - **User settings** belong to whoever is logged in. A profile carries the exporter's own, and the importer receives them as their own.
+
+        If the reason on your screen is one of these, the module did what it should. If it is not, or a setting came back with the wrong value, fill this in.
+
+        **Do not attach the profile file.** It can hold a password or an API key if the box for those was ticked when it was written.
+
+  - type: input
+    id: module-version
+    attributes:
+      label: Settings Vault version
+      description: In Foundry, open **Add-on Modules**. The version is next to the module's name.
+      placeholder: "0.2.1"
+    validations:
+      required: true
+
+  - type: input
+    id: foundry-version
+    attributes:
+      label: Foundry version
+      description: Shown at the bottom of the setup screen.
+      placeholder: "14"
+    validations:
+      required: true
+
+  - type: input
+    id: worlds
+    attributes:
+      label: The two worlds
+      description: The game system of the world you exported from, and of the world you imported into.
+      placeholder: "Exported from a world on system A, imported into a world on system A"
+    validations:
+      required: true
+
+  - type: textarea
+    id: skipped
+    attributes:
+      label: What the import report said
+      description: Copy the skipped lines from the window after the import, exactly as they appear.
+      render: text
+    validations:
+      required: true
+
+  - type: textarea
+    id: wrong-value
+    attributes:
+      label: A setting that came back wrong
+      description: Its name as shown in the report (`module-name.setting-key`), and what kind of value it holds, such as a number, a checkbox or a colour. The value itself is not needed.
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before you send it
+      options:
+        - label: The reason on my screen is not one of the three above, or a value came back wrong
+          required: true
+        - label: I did not attach or paste the profile file
+          required: true
