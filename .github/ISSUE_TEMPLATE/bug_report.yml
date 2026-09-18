@@ -1,0 +1,71 @@
+name: Something is broken
+description: The window does not open, a button does nothing, or you see a red error.
+title: "[bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting it. Everything below can be found inside Foundry; you do not need a terminal.
+
+        If an import skipped some settings, use **An import left something out** instead. The import report usually says why.
+
+  - type: input
+    id: module-version
+    attributes:
+      label: Settings Vault version
+      description: In Foundry, open **Add-on Modules**. The version is next to the module's name.
+      placeholder: "0.2.1"
+    validations:
+      required: true
+
+  - type: input
+    id: foundry-version
+    attributes:
+      label: Foundry version
+      description: Shown at the bottom of the setup screen. Inside a world, press F12, open **Console** and type `game.version`.
+      placeholder: "14"
+    validations:
+      required: true
+
+  - type: input
+    id: game-system
+    attributes:
+      label: Game system
+      description: The system the world runs on, and its version if you know it.
+    validations:
+      required: true
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What you did, what you expected, and what you got instead.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: How to make it happen again
+      placeholder: |
+        1. Open Settings, then Configure Settings, then Settings Vault
+        2. Tick two packages and press Write a profile
+        3. Nothing downloads
+    validations:
+      required: true
+
+  - type: textarea
+    id: console
+    attributes:
+      label: Errors in the console
+      description: Press F12, open **Console**, do the thing again, and paste any red lines. Leave it empty if there are none.
+      render: text
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before you send it
+      options:
+        - label: I searched the open issues and this is not one of them
+          required: true

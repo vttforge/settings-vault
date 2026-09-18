@@ -1,0 +1,31 @@
+name: An idea
+description: Something the module could do that it does not do yet.
+title: "[idea] "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        The module does two things: it carries module settings from one world to another in a file, and it tells you which of your modules have a newer release. Ideas that make either of those better move faster.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What gets in your way?
+      description: What you were trying to do at the table or while setting up, and where the module stopped helping.
+    validations:
+      required: true
+
+  - type: textarea
+    id: idea
+    attributes:
+      label: What would help
+      description: What you picture the module doing. A rough description is enough.
+    validations:
+      required: true
+
+  - type: textarea
+    id: workaround
+    attributes:
+      label: What you do today instead
+      description: Any workaround, even a clumsy one. It tells us how much the idea would save.
